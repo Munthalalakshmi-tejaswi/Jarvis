@@ -9,6 +9,122 @@ function speak(text) {
 
     window.speechSynthesis.speak(text_speak);
 }
+const countries = [
+    { name: "India", capital: "New Delhi", currency: "INR", region: "Asia", population: "1.4 billion", languages: "Hindi, English" },
+    { name: "United States", capital: "Washington, D.C.", currency: "USD", region: "North America", population: "331 million", languages: "English" },
+    { name: "United Kingdom", capital: "London", currency: "GBP", region: "Europe", population: "67 million", languages: "English" },
+    { name: "Japan", capital: "Tokyo", currency: "JPY", region: "Asia", population: "126 million", languages: "Japanese" },
+    { name: "Germany", capital: "Berlin", currency: "EUR", region: "Europe", population: "83 million", languages: "German" },
+    { name: "France", capital: "Paris", currency: "EUR", region: "Europe", population: "67 million", languages: "French" },
+    { name: "Australia", capital: "Canberra", currency: "AUD", region: "Oceania", population: "25 million", languages: "English" },
+    { name: "Canada", capital: "Ottawa", currency: "CAD", region: "North America", population: "38 million", languages: "English, French" },
+    { name: "China", capital: "Beijing", currency: "CNY", region: "Asia", population: "1.41 billion", languages: "Mandarin Chinese" },
+    { name: "Brazil", capital: "Brasília", currency: "BRL", region: "South America", population: "213 million", languages: "Portuguese" }
+];
+function displayCountries() {
+    countries.forEach(country => {
+        const card = document.createElement("div");
+        card.className = "country-card";
+        card.innerHTML = `
+            <h3>${country.name}</h3>
+            <p><strong>Capital:</strong> ${country.capital}</p>
+            <p><strong>Currency:</strong> ${country.currency}</p>
+            <p><strong>Region:</strong> ${country.region}</p>
+            <p><strong>Population:</strong> ${country.population}</p>
+            <p><strong>Languages:</strong> ${country.languages}</p>
+        `;
+        countryContainer.appendChild(card);
+    });
+}
+window.addEventListener('load', displayCountries);
+
+// Country Info Voice Command
+function takeCommand(message) {
+    let found = false;
+    for (let country of countries) {
+        if (message.includes(country.name.toLowerCase())) {
+            const info = `${country.name}'s capital is ${country.capital}, currency is ${country.currency}, region is ${country.region}, population is ${country.population}, and languages spoken are ${country.languages}.`;
+            speak(info);
+            content.textContent = info;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        content.textContent = "Listening...";
+    }
+}
+
+let todoList = [];
+
+// Add Task
+function addTask(task) {
+    todoList.push(task);
+    speak(`Task added: ${task}`);
+    content.textContent = `Task added: ${task}`;
+}
+
+// Show Tasks
+function showTasks() {
+    if (todoList.length === 0) {
+        speak("Your to-do list is empty.");
+        content.textContent = "Your to-do list is empty.";
+    } else {
+        const tasks = todoList.join(", ");
+        speak("Your tasks are: " + tasks);
+        content.textContent = "Your tasks: " + tasks;
+    }
+}
+
+// Remove Task
+function removeTask(task) {
+    const index = todoList.indexOf(task);
+    if (index > -1) {
+        todoList.splice(index, 1);
+        speak(`Task removed: ${task}`);
+        content.textContent = `Task removed: ${task}`;
+    } else {
+        speak(`Task not found: ${task}`);
+        content.textContent = `Task not found: ${task}`;
+    }
+}
+
+// Clear All Tasks
+function clearTasks() {
+    todoList = [];
+    speak("All tasks cleared.");
+    content.textContent = "All tasks cleared.";
+}
+
+// Array to store reminders
+let reminders = [];
+
+// Function to set a reminder
+function setReminder(timeString, task) {
+    const now = new Date();
+    const reminderTime = new Date(now.toDateString() + ' ' + timeString);
+
+    if (reminderTime < now) {
+        speak("The specified time has already passed. Please set a future time.");
+        content.textContent = "Reminder time must be in the future!";
+        return;
+    }
+
+    reminders.push({ time: reminderTime, task: task });
+    speak(`Reminder set for ${timeString}: ${task}`);
+    content.textContent = `Reminder set for ${timeString}: ${task}`;
+
+    // Check every second if reminder time has arrived
+    const interval = setInterval(() => {
+        const currentTime = new Date();
+        if (currentTime >= reminderTime) {
+            speak(`Reminder: ${task}`);
+            content.textContent = `Reminder: ${task}`;
+            clearInterval(interval);
+        }
+    }, 1000);
+}
+
 function wishMe() {
     var day = new Date();
     var hour = day.getHours();
@@ -193,6 +309,22 @@ function takeCommand(message) {
         };
         window.speechSynthesis.speak(utterance);
     } 
+    // Set Alarm or Reminder
+else if (message.includes("set alarm") || message.includes("set reminder")) {
+    // Try to extract time and task from the message
+    const timeMatch = message.match(/(\d{1,2}(:\d{2})?\s?(am|pm)?)/i);
+    const taskMatch = message.match(/for (.+)/i);
+
+    if (timeMatch) {
+        const time = timeMatch[0]; // Extracted time
+        const task = taskMatch ? taskMatch[1] : "Alarm"; // Extract task or default "Alarm"
+        setReminder(time, task);
+    } else {
+        speak("Please specify a valid time for the reminder.");
+        content.textContent = "Specify a valid time for the reminder.";
+    }
+}
+
     else if (message.includes("open facebook")) {
         const utterance = new SpeechSynthesisUtterance("Opening Facebook...");
         utterance.onend = () => {
@@ -293,6 +425,43 @@ function takeCommand(message) {
         speak(randomJoke);
         content.textContent = randomJoke;
     }
+    // Timer command
+else if (message.includes("set timer")) {
+    // Example: "set timer 2 minutes" or "set timer 30 seconds"
+    const timeMatch = message.match(/(\d+)\s?(seconds|second|minutes|minute)/i);
+    if (timeMatch) {
+        let value = parseInt(timeMatch[1]);
+        let unit = timeMatch[2].toLowerCase();
+        if (unit.includes("minute")) value *= 60; // convert to seconds
+        startTimer(value);
+    } else {
+        speak("Please specify the timer duration in seconds or minutes.");
+        content.textContent = "Specify timer duration.";
+    }
+}
+// To-Do List Commands
+else if (message.includes("add task")) {
+    const task = message.replace("add task", "").trim();
+    if (task) addTask(task);
+    else {
+        speak("Please specify a task to add.");
+        content.textContent = "Specify a task to add.";
+    }
+}
+else if (message.includes("show tasks") || message.includes("my tasks")) {
+    showTasks();
+}
+else if (message.includes("remove task")) {
+    const task = message.replace("remove task", "").trim();
+    if (task) removeTask(task);
+    else {
+        speak("Please specify a task to remove.");
+        content.textContent = "Specify a task to remove.";
+    }
+}
+else if (message.includes("clear tasks")) {
+    clearTasks();
+}
 
     else if (message.includes("open calculator")) {
         const utterance = new SpeechSynthesisUtterance("Opening Calculator...");
@@ -323,7 +492,7 @@ function takeCommand(message) {
         content.textContent = unsupported;
     }
 }
-    
+  
 
 
 
