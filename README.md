@@ -8,6 +8,7 @@
 
 ## 🚀 About Jarvis
 Jarvis is a **voice-controlled AI assistant** that can **chat, execute tasks, open apps/websites, fetch information, calculate, tell jokes, and provide battery status**. It integrates **speech recognition, text-to-speech, and intelligent command handling** for a seamless interactive experience.
+**AI Chat Mode:** Jarvis can understand and respond to AI-related questions, general queries, and commands intelligently. Users can ask about **Artificial Intelligence, definitions, general knowledge, or other topics**, and Jarvis provides answers using text and voice. This mode makes interactions feel like a natural AI conversation.
 
 ---
 
