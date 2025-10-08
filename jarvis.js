@@ -1,351 +1,160 @@
-const btn = document.querySelector('.talk');
-const content = document.querySelector('.content');
+const btn = document.querySelector(".talk");
+const content = document.querySelector(".content");
+const countrySection = document.getElementById("countrySection");
+const countryContainer = document.getElementById("countryContainer");
+
+// Speech synthesis
 function speak(text) {
-    const text_speak = new SpeechSynthesisUtterance(text);
-
-    text_speak.rate = 1;
-    text_speak.volume = 1;
-    text_speak.pitch = 1;
-
-    window.speechSynthesis.speak(text_speak);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
 }
-function wishMe() {
-    var day = new Date();
-    var hour = day.getHours();
 
-    if (hour >= 0 && hour < 12) {
-        speak("Good Morning Boss...");
-    } else if (hour >= 12 && hour < 17) {
-        speak("Good Afternoon Master...");
-    } else {
-        speak("Good Evening Sir...");
+// Helper functions
+function triggerEffects(callback) {
+    setTimeout(callback, 500);
+}
+
+function speakAndThenNavigate(msg, url) {
+    speak(msg);
+    setTimeout(() => window.open(url, "_blank"), 1500);
+}
+
+function calculate(expr) {
+    try {
+        let result = eval(expr);
+        speak(`The answer is ${result}`);
+        content.textContent = `Result: ${result}`;
+    } catch (error) {
+        speak("Sorry, I couldn't calculate that.");
     }
 }
 
-window.addEventListener('load', () => {
-    speak("Initializing JARVIS...");
-    wishMe();
-});
- 
+// ============= COUNTRY DATA (expanded major countries) =============
+const countries = {
+    "india": {capital:"New Delhi", population:"1.4 Billion", language:"Hindi, English", currency:"Indian Rupee (INR)"},
+    "united states": {capital:"Washington, D.C.", population:"331 Million", language:"English", currency:"US Dollar (USD)"},
+    "usa": {capital:"Washington, D.C.", population:"331 Million", language:"English", currency:"US Dollar (USD)"},
+    "canada": {capital:"Ottawa", population:"38 Million", language:"English, French", currency:"Canadian Dollar (CAD)"},
+    "japan": {capital:"Tokyo", population:"125 Million", language:"Japanese", currency:"Yen (JPY)"},
+    "germany": {capital:"Berlin", population:"83 Million", language:"German", currency:"Euro (EUR)"},
+    "france": {capital:"Paris", population:"65 Million", language:"French", currency:"Euro (EUR)"},
+    "china": {capital:"Beijing", population:"1.41 Billion", language:"Mandarin", currency:"Renminbi (Yuan CNY)"},
+    "australia": {capital:"Canberra", population:"26 Million", language:"English", currency:"Australian Dollar (AUD)"},
+    "united kingdom": {capital:"London", population:"67 Million", language:"English", currency:"Pound Sterling (GBP)"},
+    "uk": {capital:"London", population:"67 Million", language:"English", currency:"Pound Sterling (GBP)"},
+    "russia": {capital:"Moscow", population:"146 Million", language:"Russian", currency:"Russian Ruble (RUB)"},
+    "brazil": {capital:"Brasília", population:"213 Million", language:"Portuguese", currency:"Brazilian Real (BRL)"},
+    "south africa": {capital:"Pretoria", population:"60 Million", language:"Zulu, Xhosa, Afrikaans, English", currency:"South African Rand (ZAR)"},
+    "mexico": {capital:"Mexico City", population:"128 Million", language:"Spanish", currency:"Mexican Peso (MXN)"},
+    "italy": {capital:"Rome", population:"60 Million", language:"Italian", currency:"Euro (EUR)"},
+    "spain": {capital:"Madrid", population:"47 Million", language:"Spanish", currency:"Euro (EUR)"},
+    "south korea": {capital:"Seoul", population:"52 Million", language:"Korean", currency:"South Korean Won (KRW)"},
+    "north korea": {capital:"Pyongyang", population:"25 Million", language:"Korean", currency:"North Korean Won (KPW)"},
+    "turkey": {capital:"Ankara", population:"84 Million", language:"Turkish", currency:"Turkish Lira (TRY)"},
+    "egypt": {capital:"Cairo", population:"102 Million", language:"Arabic", currency:"Egyptian Pound (EGP)"},
+    "argentina": {capital:"Buenos Aires", population:"45 Million", language:"Spanish", currency:"Argentine Peso (ARS)"},
+    "saudi arabia": {capital:"Riyadh", population:"35 Million", language:"Arabic", currency:"Saudi Riyal (SAR)"},
+    "thailand": {capital:"Bangkok", population:"70 Million", language:"Thai", currency:"Thai Baht (THB)"},
+    "pakistan": {capital:"Islamabad", population:"240 Million", language:"Urdu, English", currency:"Pakistani Rupee (PKR)"},
+    "bangladesh": {capital:"Dhaka", population:"166 Million", language:"Bengali", currency:"Bangladeshi Taka (BDT)"},
+    "indonesia": {capital:"Jakarta", population:"273 Million", language:"Indonesian", currency:"Indonesian Rupiah (IDR)"},
+    "new zealand": {capital:"Wellington", population:"5 Million", language:"English, Maori", currency:"New Zealand Dollar (NZD)"},
+    "netherlands": {capital:"Amsterdam", population:"17 Million", language:"Dutch", currency:"Euro (EUR)"},
+    "switzerland": {capital:"Bern", population:"8.7 Million", language:"German, French, Italian", currency:"Swiss Franc (CHF)"},
+    "sweden": {capital:"Stockholm", population:"10 Million", language:"Swedish", currency:"Swedish Krona (SEK)"},
+    "norway": {capital:"Oslo", population:"5.4 Million", language:"Norwegian", currency:"Norwegian Krone (NOK)"},
+    "finland": {capital:"Helsinki", population:"5.5 Million", language:"Finnish, Swedish", currency:"Euro (EUR)"},
+    "denmark": {capital:"Copenhagen", population:"5.8 Million", language:"Danish", currency:"Danish Krone (DKK)"},
+    "philippines": {capital:"Manila", population:"113 Million", language:"Filipino, English", currency:"Philippine Peso (PHP)"},
+    "singapore": {capital:"Singapore", population:"5.7 Million", language:"English, Malay, Mandarin, Tamil", currency:"Singapore Dollar (SGD)"},
+    "malaysia": {capital:"Kuala Lumpur", population:"33 Million", language:"Malay", currency:"Malaysian Ringgit (MYR)"}
+};
+
+// Show country info
+function showCountryInfo(name) {
+    const data = countries[name.toLowerCase()];
+    if (data) {
+        countrySection.style.display = "block";
+        countryContainer.innerHTML = `
+            <div class="country-card">
+                <h3>${name.toUpperCase()}</h3>
+                <p><b>Capital:</b> ${data.capital}</p>
+                <p><b>Population:</b> ${data.population}</p>
+                <p><b>Language:</b> ${data.language}</p>
+                <p><b>Currency:</b> ${data.currency}</p>
+            </div>`;
+        speak(`Here is some information about ${name}`);
+    } else {
+        speak("Sorry, I don't have data for that country yet.");
+    }
+}
+
+// Speech recognition setup
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
+btn.addEventListener("click", () => recognition.start());
+
 recognition.onresult = (event) => {
-    const currentIndex = event.resultIndex;
-    const transcript = event.results[currentIndex][0].transcript;
+    const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
     content.textContent = transcript;
-    takeCommand(transcript.toLowerCase());
+    takeCommand(transcript);
 };
 
-btn.addEventListener('click', () => {
-    content.textContent = "Listening...";
-    recognition.start();
-});
-
-
+// ================= Command Handling =================
 function takeCommand(message) {
-    if (message.includes('hey') || message.includes('hello')) {
-        speak("Hello Sir, How May I Help You?");
-    } else if (message.includes("open google")) {
-        window.open("https://www.bing.com/search?pglt=297&q=google&cvid=9075900a09d148fe9f91608832c90cfd&gs_lcrp=EgRlZGdlKgYIABBFGDkyBggAEEUYOTIGCAEQRRg8MgYIAhBFGDwyBggDEEUYQTIGCAQQRRhBMgYIBRBFGDwyBggGEEUYPDIGCAcQRRhBMgYICBBFGDzSAQgzMzQ5ajBqMagCALACAA&FORM=ANNTA1&PC=HCTS", "_blank");
-        window.open("https://www.google.com", "_blank");
-        speak("Opening Google...");
-        window.location.href = "https://www.google.com";  // navigates immediately in the same tab google
-    } 
-    else if (message.includes("open whatsapp")) {
-        window.open("https://wa.me/", "_blank");
-        speak("Opening Whatsapp...");
-        window.location.href = "https://wa.me/1234567890";  // navigates immediately in the same tab whatsapp
-    }
-  
+    message = message.toLowerCase();
 
-    else if (message.includes("open youtube")) {
-        window.open("https://www.youtube.com/", "_blank");
-        speak("Opening Youtube...");
-        window.location.href = "https://www.youtube.com";  // navigates immediately in the same tab youtube
-    } else if (message.includes("open facebook")) {
-        window.open("https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2F", "_blank");
-        speak("Opening Facebook...");
-        window.location.href = "https://www.facebook.com";  // navigates immediately in the same tab facebook
-    } 
-else if (message.includes("open calculator")) {
-    speak("Opening calculator");
-    window.open("https://www.desmos.com/scientific", "_blank");
-    window.location.href = "https://www.desmos.com/scientific";  // navigates immediately in the same tab calculator
-}
-    else if (message.includes("joke")) {
-        const jokes = [
-            "Why do programmers prefer dark mode? Because light attracts bugs!",
-    "I told my computer I needed a break, and now it won't stop sending me Kit Kat ads.",
-    "Why do Java developers wear glasses? Because they don't C sharp.",
-    "Why did the programmer quit his job? Because he didn't get arrays.",
-    "Why don’t skeletons fight each other? They don’t have the guts.",
-    "Why can’t you hear a pterodactyl go to the bathroom? Because the P is silent.",
-    "What do you call cheese that isn't yours? Nacho cheese!",
-    "Why was the math book sad? It had too many problems.",
-    "I used to play piano by ear, but now I use my hands.",
-    "Parallel lines have so much in common… it’s a shame they’ll never meet.",
-    "Why did the scarecrow win an award? Because he was outstanding in his field!",
-    "I asked my dog what's two minus two. He said nothing.",
-    "I would tell you a construction joke, but I’m still working on it.",
-    "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
-    "What do you call fake spaghetti? An impasta!",
-    "What did the zero say to the eight? Nice belt!",
-    "Why can't your nose be 12 inches long? Because then it would be a foot!",
-    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
-    "I’m reading a book about anti-gravity. It’s impossible to put down!",
-    "I told my computer I needed a break, now it won’t stop recommending beaches.",
-    "Why don’t oysters share their pearls? Because they’re shellfish.",
-    "What happens to a frog's car when it breaks down? It gets toad away.",
-    "Want to hear a joke about paper? Never mind, it’s tearable.",
-    "Why did the bicycle fall over? Because it was two-tired.",
-    "Why do programmers hate nature? It has too many bugs"
-    
-        ];
-        const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
+    // Greetings
+    if (message.includes("hello") || message.includes("hey")) {
+        speak("Hello Sir, how may I help you?");
     }
 
-else if (message.includes("jokes for students")) {
-        const jokesforstudents = [
-            "Why was the math book sad? Because it had too many problems.",
-    "Why did the student eat his homework? Because the teacher told him it was a piece of cake!",
-    "Why don’t scientists trust atoms? Because they make up everything!",
-    "Why did the music teacher go to jail? Because she got caught with too many notes.",
-    "What did the zero say to the eight? Nice belt!",
-    "Why was the computer cold? Because it left its Windows open!",
-    "Why do we never tell secrets on a farm? Because the potatoes have eyes and the corn has ears!",
-    "Why did the student bring a ladder to school? Because she wanted to go to high school.",
-    "How do you make seven an even number? Remove the ‘s’!",
-    "Why can't you do your math homework in the jungle? Because if you add 4+4, you get ate!",
-    "Why did the teacher wear sunglasses to class? Because her students were so bright!",
-    "Why did the pencil get an award? Because it had a point.",
-    "Why did the biology teacher break up with the physics teacher? There was no chemistry.",
-    "Teacher: 'Why are you late?' Student: 'Class started before I got here!'",
-    "Why don’t we write with broken pencils? Because it’s pointless."
-        ];
-        const randomJoke = jokesforstudents[Math.floor(Math.random() * jokesforstudents.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
-    }
-
-
-else if (message.includes("open instagram")) {
-        window.open("https://www.instagram.com/", "_blank");
-        speak("Opening Instagram...");
-        window.location.href = "https://www.instagram.com/";  // navigates immediately in the same tab instagram
-    } 
-  else if (message.includes('what is') || message.includes('who is') || message.includes('what are')) {
-        window.open(`https://www.google.com/search?q=${message.replace(/ /g, "+")}`,"_blank");
-        const finalText = "This is what I found on the internet regarding " + message;
-        speak(finalText);
-    }
-  else if (message.includes("battery")) {
-    if ("getBattery" in navigator) {
-        navigator.getBattery().then(function(battery) {
-            const level = Math.round(battery.level * 100);
-            const chargingStatus = battery.charging ? "Yes, it is charging." : "No, it is not charging.";
-
-            // First message: battery percentage
-            speak(`Your battery is at ${level} percent.`);
-            content.textContent = `Your battery is at ${level} percent.`;
-
-            // Delay the second message slightly so they don't overlap
-            setTimeout(() => {
-                speak(`Is it charging? ${chargingStatus}`);
-                content.textContent += `\nIs it charging? ${chargingStatus}`;
-            }, 2500); // 2.5 second delay
+    // AI Mode
+    else if (message.includes("ai mode") || message.includes("jarvis mode") || message.includes("change to ai")) {
+        triggerEffects(() => {
+            speak("Switching to Jarvis AI Mode...");
+            window.location.href = "ai-mode.html"; 
         });
-    } else {
-        const unsupported = "Sorry, your device does not support checking battery status.";
-        speak(unsupported);
-        content.textContent = unsupported;
+    }
+
+    // Open websites
+    else if (message.includes("open google")) speakAndThenNavigate("Opening Google...", "https://www.google.com");
+    else if (message.includes("open youtube")) speakAndThenNavigate("Opening YouTube...", "https://www.youtube.com");
+    else if (message.includes("open facebook")) speakAndThenNavigate("Opening Facebook...", "https://www.facebook.com");
+
+    // Date & Time
+    else if (message.includes("date")) {
+        const date = new Date().toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric", year:"numeric"});
+        speak("Today's date is " + date);
+        content.textContent = "Today's date is " + date;
+    }
+    else if (message.includes("time")) {
+        const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        speak("The current time is " + time);
+        content.textContent = "Time: " + time;
+    }
+
+    // Calculator
+    else if (message.includes("calculate") || message.includes("what is") || message.includes("solve")) {
+        let expr = message.replace("calculate","").replace("what is","").replace("solve","").trim();
+        calculate(expr);
+    }
+
+    // Country info
+    else if (message.includes("country") || message.includes("show") || message.includes("tell me about")) {
+        let countryName = message.replace("country","").replace("show","").replace("tell me about","").trim();
+        if (countryName) showCountryInfo(countryName);
+        else speak("Please say the country name.");
+    }
+
+    // Default → Google search
+    else {
+        window.open(`https://www.google.com/search?q=${message.replace(/ /g,"+")}`, "_blank");
+        speak("I found some information for " + message + " on Google");
+        content.textContent = "Searching Google for " + message;
     }
 }
- 
-
-    else if (message.includes("open wikipedia")) {
-        window.open("https://www.wikipedia.org/", "_blank");
-        speak("Opening wikipedia...");
-        window.location.href = "https://www.wikipedia.org/";  // navigates immediately in the same tab wikipedia
-    } 
-     else if (message.includes("play music")) {
-        window.open("https://music.youtube.com", "_blank");
-        speak("Opening YouTube Music for you...");
-        window.location.href = "https://music.youtube.com";  // navigates immediately in the same tab music
-    } 
-      else if (message.includes('date')) {
-        const date = new Date().toLocaleString(undefined, { month: "short", day: "numeric" });
-        const finalText = "Today's date is " + date;
-        speak(finalText);
-    }  else {
-        window.open(`https://www.google.com/search?q=${message.replace(/ /g, "+")}`, "_blank");
-        const finalText = "I found some information for " + message + " on Google";
-        speak(finalText);
-    }
-}
-function takeCommand(message) {
-    if (message.includes("open google")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Google...");
-        utterance.onend = () => {
-            window.location.href = "https://www.google.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    } 
-    else if (message.includes("open facebook")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Facebook...");
-        utterance.onend = () => {
-            window.location.href = "https://www.facebook.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-
-        else if (message.includes("open whatsapp")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Whatsapp...");
-        utterance.onend = () => {
-            window.location.href = "https://wa.me/1234567890";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-       else if (message.includes("open youtube")) {
-        const utterance = new SpeechSynthesisUtterance("Opening YouTube...");
-        utterance.onend = () => {
-            window.location.href = "https://www.youtube.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-   else if (message.includes("time")) {
-        const time = new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        const finalText = "The current time is " + time;
-        speak(finalText);                // Say it
-        content.textContent = finalText; // Show it
-    }
-    else if (message.includes("open instagram")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Instagram...");
-        utterance.onend = () => {
-            window.location.href = "https://www.instagram.com/";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-      else if (message.includes("open wikipedia")) {
-        const utterance = new SpeechSynthesisUtterance("Opening wikipedia...");
-        utterance.onend = () => {
-            window.location.href = "https://www.wikipedia.org/";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-      else if (message.includes("joke")) {
-        const jokes = [
-           "Why do programmers prefer dark mode? Because light attracts bugs!",
-    "I told my computer I needed a break, and now it won't stop sending me Kit Kat ads.",
-    "Why do Java developers wear glasses? Because they don't C sharp.",
-    "Why did the programmer quit his job? Because he didn't get arrays.",
-    "Why don’t skeletons fight each other? They don’t have the guts.",
-    "Why can’t you hear a pterodactyl go to the bathroom? Because the P is silent.",
-    "What do you call cheese that isn't yours? Nacho cheese!",
-    "Why was the math book sad? It had too many problems.",
-    "I used to play piano by ear, but now I use my hands.",
-    "Parallel lines have so much in common… it’s a shame they’ll never meet.",
-    "Why did the scarecrow win an award? Because he was outstanding in his field!",
-    "I asked my dog what's two minus two. He said nothing.",
-    "I would tell you a construction joke, but I’m still working on it.",
-    "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
-    "What do you call fake spaghetti? An impasta!",
-    "What did the zero say to the eight? Nice belt!",
-    "Why can't your nose be 12 inches long? Because then it would be a foot!",
-    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
-    "I’m reading a book about anti-gravity. It’s impossible to put down!",
-    "I told my computer I needed a break, now it won’t stop recommending beaches.",
-    "Why don’t oysters share their pearls? Because they’re shellfish.",
-    "What happens to a frog's car when it breaks down? It gets toad away.",
-    "Want to hear a joke about paper? Never mind, it’s tearable.",
-    "Why did the bicycle fall over? Because it was two-tired.",
-    "Why do programmers hate nature? It has too many bugs"
-        ];
-        const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
-    }
- else if (message.includes("jokes for students")) {
-        const jokesforstudents = [
-            "Why was the math book sad? Because it had too many problems.",
-    "Why did the student eat his homework? Because the teacher told him it was a piece of cake!",
-    "Why don’t scientists trust atoms? Because they make up everything!",
-    "Why did the music teacher go to jail? Because she got caught with too many notes.",
-    "What did the zero say to the eight? Nice belt!",
-    "Why was the computer cold? Because it left its Windows open!",
-    "Why do we never tell secrets on a farm? Because the potatoes have eyes and the corn has ears!",
-    "Why did the student bring a ladder to school? Because she wanted to go to high school.",
-    "How do you make seven an even number? Remove the ‘s’!",
-    "Why can't you do your math homework in the jungle? Because if you add 4+4, you get ate!",
-    "Why did the teacher wear sunglasses to class? Because her students were so bright!",
-    "Why did the pencil get an award? Because it had a point.",
-    "Why did the biology teacher break up with the physics teacher? There was no chemistry.",
-    "Teacher: 'Why are you late?' Student: 'Class started before I got here!'",
-    "Why don’t we write with broken pencils? Because it’s pointless."
-        ];
-        const randomJoke = jokesforstudents[Math.floor(Math.random() * jokesforstudents.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
-    }
-
-    else if (message.includes("open calculator")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Calculator...");
-        utterance.onend = () => {
-            window.location.href = "https://www.desmos.com/scientific";
-        };
-        window.speechSynthesis.speak(utterance);
-    }  
-    else if (message.includes("battery")) {
-    if ("getBattery" in navigator) {
-        navigator.getBattery().then(function(battery) {
-            const level = Math.round(battery.level * 100);
-            const chargingStatus = battery.charging ? "Yes, it is charging." : "No, it is not charging.";
-
-            // First message: battery percentage
-            speak(`Your battery is at ${level} percent.`);
-            content.textContent = `Your battery is at ${level} percent.`;
-
-            // Delay the second message slightly so they don't overlap
-            setTimeout(() => {
-                speak(`Is it charging? ${chargingStatus}`);
-                content.textContent += `\nIs it charging? ${chargingStatus}`;
-            }, 2500); // 2.5 second delay
-        });
-    } else {
-        const unsupported = "Sorry, your device does not support checking battery status.";
-        speak(unsupported);
-        content.textContent = unsupported;
-    }
-}
-    
-
-
-
-    else if (message.includes("play music")) {
-        const utterance = new SpeechSynthesisUtterance("Opening YouTube Music for you...");
-        utterance.onend = () => {
-            window.location.href = "https://music.youtube.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    }  
-   else if (message.includes("date")) {
-    const date = new Date().toLocaleDateString(undefined, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-    });
-
-    const finalText = "Today's date is " + date;
-    speak(finalText);                // Speak the date
-    content.textContent = finalText; // Show it on the screen
-}
-
-}
-
