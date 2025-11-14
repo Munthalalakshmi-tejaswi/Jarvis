@@ -1,0 +1,25 @@
+{
+  "name": "jarvis",
+  "version": "1.0.0",
+  "description": "JARVIS Virtual Assistant\r Overview\r JARVIS is a voice-controlled virtual assistant built with HTML, CSS, and JavaScript. You can speak commands, and JARVIS will respond with voice and UI updates.",
+  "main": "ai-mode.js",
+  "scripts": {
+    "start": "node ai-mode.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Munthalalakshmi-tejaswi/Jarvis.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Munthalalakshmi-tejaswi/Jarvis/issues"
+  },
+  "homepage": "https://github.com/Munthalalakshmi-tejaswi/Jarvis#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0"
+  }
+}

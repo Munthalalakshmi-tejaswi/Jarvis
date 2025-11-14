@@ -196,6 +196,13 @@ function takeCommand(message) {
         };
         window.speechSynthesis.speak(utterance);
     }
+    else if (message.includes("ai mode")) {
+    speak("Opening AI Mode...");
+    content.textContent = "Opening AI Mode...";
+    window.open("ai-mode.html", "_blank");
+}
+
+
 
         else if (message.includes("open whatsapp")) {
         const utterance = new SpeechSynthesisUtterance("Opening Whatsapp...");
