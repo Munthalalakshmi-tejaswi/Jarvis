@@ -1,4 +1,3 @@
-// ------- CONFIG --------
 const AI_API_URL = "http://localhost:3000/messages";
 const RETURN_PAGE = "ai.html";
 
