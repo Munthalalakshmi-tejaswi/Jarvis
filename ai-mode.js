@@ -50,12 +50,77 @@ function calculate(expr) {
   }
 }
 
+// ================= To-Do List Setup =================
+let todos = []; // store tasks in memory
+
+function addTodoTask(task) {
+  if (!task) return;
+  todos.push(task);
+  addMessage("📝 Task added: " + task, "bot");
+  speak("Task added: " + task);
+}
+
+function clearTodoTasks() {
+  todos = [];
+  addMessage("🗑 All tasks cleared.", "bot");
+  speak("All tasks cleared.");
+}
+
+function listTodoTasks() {
+  if (todos.length === 0) {
+    addMessage("No tasks yet.", "bot");
+    speak("You have no tasks.");
+  } else {
+    let list = todos.map((t, i) => `${i + 1}. ${t}`).join("<br>");
+    addMessage("📋 Your tasks:<br>" + list, "bot");
+    speak("Here are your tasks.");
+  }
+}
+
+// ================= Weather API Integration =================
+async function getWeather(city) {
+  const apiKey = "YOUR_API_KEY"; // <-- Replace with your OpenWeatherMap API key
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+    );
+    const data = await response.json();
+
+    if (data.cod === 200) {
+      const msg = `Weather in ${city}: ${data.weather[0].description}, Temp: ${data.main.temp}°C`;
+      addMessage(msg, "bot");
+      speak(msg);
+    } else {
+      addMessage("City not found", "bot");
+      speak("Sorry, I couldn't find that city.");
+    }
+  } catch (error) {
+    addMessage("Error fetching weather", "bot");
+    speak("There was an error getting the weather.");
+  }
+}
+
 // Handle user commands
 function handleCommand(message) {
   const lowerMessage = message.toLowerCase();
   addMessage(message, "user");
 
-  // Check AI definition **first**
+  // ✅ To-Do List commands
+  if (lowerMessage.startsWith("add task")) {
+    const task = lowerMessage.replace("add task", "").trim();
+    addTodoTask(task);
+    return;
+  }
+  if (lowerMessage.startsWith("clear tasks")) {
+    clearTodoTasks();
+    return;
+  }
+  if (lowerMessage.startsWith("show tasks") || lowerMessage.startsWith("list tasks")) {
+    listTodoTasks();
+    return;
+  }
+
+  // AI definition
   if (
     lowerMessage === "what is ai" ||
     lowerMessage === "define ai" ||
@@ -66,10 +131,10 @@ function handleCommand(message) {
       "🤖 Artificial Intelligence, or AI, is a branch of computer science that enables machines to perform tasks that normally require human intelligence — like learning from data, recognizing speech or images, solving problems, and making decisions.";
     addMessage(reply, "bot");
     speak(reply);
-    return; // stop further checks
+    return;
   }
 
-  // Optional greetings
+  // Greetings
   if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
     const reply = "🤖 Hello! How may I help you?";
     addMessage(reply, "bot");
@@ -89,7 +154,6 @@ function handleCommand(message) {
     speak("The current time is " + time);
     return;
   }
-
   if (lowerMessage.includes("date")) {
     const date = new Date().toLocaleDateString();
     addMessage("📅 Today's Date: " + date, "bot");
@@ -97,10 +161,17 @@ function handleCommand(message) {
     return;
   }
 
-  // Calculator (avoid triggering on "what is ai")
+  // Calculator
   if (lowerMessage.includes("calculate") || lowerMessage.includes("solve")) {
     let expr = lowerMessage.replace("calculate", "").replace("solve", "").trim();
     calculate(expr);
+    return;
+  }
+
+  // Weather command
+  if (lowerMessage.includes("weather in")) {
+    const city = lowerMessage.replace("weather in", "").trim();
+    getWeather(city);
     return;
   }
 
@@ -131,15 +202,12 @@ userInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
-// Voice recognition setup
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
-recognition.continuous = false;
-recognition.lang = "en-US";
-
-micBtn.addEventListener("click", () => recognition.start());
-
-recognition.onresult = (event) => {
-  const transcript = event.results[0][0].transcript;
-  handleCommand(transcript);
-};
+// ================= Mic Button (Siri Voice Mode) =================
+micBtn.addEventListener("click", () => {
+  speak("Switching to Siri Voice Mode...");
+  document.body.style.opacity = 0;
+  document.body.style.transition = "opacity 0.5s ease";
+  setTimeout(() => {
+    window.location.href = "siri.html";
+  }, 500);
+});

@@ -3,7 +3,7 @@ const content = document.querySelector(".content");
 const countrySection = document.getElementById("countrySection");
 const countryContainer = document.getElementById("countryContainer");
 
-// Speech synthesis
+// ================= Speech synthesis =================
 function speak(text) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1;
@@ -12,7 +12,7 @@ function speak(text) {
     window.speechSynthesis.speak(utterance);
 }
 
-// Helper functions
+// ================= Helper functions =================
 function triggerEffects(callback) {
     setTimeout(callback, 500);
 }
@@ -32,48 +32,36 @@ function calculate(expr) {
     }
 }
 
-// ============= COUNTRY DATA (expanded major countries) =============
+// ================= Weather API =================
+async function getWeather(city) {
+    const apiKey = "YOUR_API_KEY"; // <-- Replace with your OpenWeatherMap API key
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},IN&appid=${apiKey}&units=metric`);
+        const data = await response.json();
+
+        if (data.cod === 200) {
+            const msg = `Weather in ${city}: ${data.weather[0].description}, Temp: ${data.main.temp}°C`;
+            speak(msg);
+            content.textContent = msg;
+        } else {
+            speak("Sorry, I couldn't find that city.");
+            content.textContent = "City not found";
+        }
+    } catch (error) {
+        speak("There was an error fetching the weather.");
+        content.textContent = "Weather API error";
+    }
+}
+
+// ================= Country Info =================
 const countries = {
-    "india": {capital:"New Delhi", population:"1.4 Billion", language:"Hindi, English", currency:"Indian Rupee (INR)"},
-    "united states": {capital:"Washington, D.C.", population:"331 Million", language:"English", currency:"US Dollar (USD)"},
-    "usa": {capital:"Washington, D.C.", population:"331 Million", language:"English", currency:"US Dollar (USD)"},
-    "canada": {capital:"Ottawa", population:"38 Million", language:"English, French", currency:"Canadian Dollar (CAD)"},
-    "japan": {capital:"Tokyo", population:"125 Million", language:"Japanese", currency:"Yen (JPY)"},
-    "germany": {capital:"Berlin", population:"83 Million", language:"German", currency:"Euro (EUR)"},
-    "france": {capital:"Paris", population:"65 Million", language:"French", currency:"Euro (EUR)"},
-    "china": {capital:"Beijing", population:"1.41 Billion", language:"Mandarin", currency:"Renminbi (Yuan CNY)"},
-    "australia": {capital:"Canberra", population:"26 Million", language:"English", currency:"Australian Dollar (AUD)"},
-    "united kingdom": {capital:"London", population:"67 Million", language:"English", currency:"Pound Sterling (GBP)"},
-    "uk": {capital:"London", population:"67 Million", language:"English", currency:"Pound Sterling (GBP)"},
-    "russia": {capital:"Moscow", population:"146 Million", language:"Russian", currency:"Russian Ruble (RUB)"},
-    "brazil": {capital:"Brasília", population:"213 Million", language:"Portuguese", currency:"Brazilian Real (BRL)"},
-    "south africa": {capital:"Pretoria", population:"60 Million", language:"Zulu, Xhosa, Afrikaans, English", currency:"South African Rand (ZAR)"},
-    "mexico": {capital:"Mexico City", population:"128 Million", language:"Spanish", currency:"Mexican Peso (MXN)"},
-    "italy": {capital:"Rome", population:"60 Million", language:"Italian", currency:"Euro (EUR)"},
-    "spain": {capital:"Madrid", population:"47 Million", language:"Spanish", currency:"Euro (EUR)"},
-    "south korea": {capital:"Seoul", population:"52 Million", language:"Korean", currency:"South Korean Won (KRW)"},
-    "north korea": {capital:"Pyongyang", population:"25 Million", language:"Korean", currency:"North Korean Won (KPW)"},
-    "turkey": {capital:"Ankara", population:"84 Million", language:"Turkish", currency:"Turkish Lira (TRY)"},
-    "egypt": {capital:"Cairo", population:"102 Million", language:"Arabic", currency:"Egyptian Pound (EGP)"},
-    "argentina": {capital:"Buenos Aires", population:"45 Million", language:"Spanish", currency:"Argentine Peso (ARS)"},
-    "saudi arabia": {capital:"Riyadh", population:"35 Million", language:"Arabic", currency:"Saudi Riyal (SAR)"},
-    "thailand": {capital:"Bangkok", population:"70 Million", language:"Thai", currency:"Thai Baht (THB)"},
-    "pakistan": {capital:"Islamabad", population:"240 Million", language:"Urdu, English", currency:"Pakistani Rupee (PKR)"},
-    "bangladesh": {capital:"Dhaka", population:"166 Million", language:"Bengali", currency:"Bangladeshi Taka (BDT)"},
-    "indonesia": {capital:"Jakarta", population:"273 Million", language:"Indonesian", currency:"Indonesian Rupiah (IDR)"},
-    "new zealand": {capital:"Wellington", population:"5 Million", language:"English, Maori", currency:"New Zealand Dollar (NZD)"},
-    "netherlands": {capital:"Amsterdam", population:"17 Million", language:"Dutch", currency:"Euro (EUR)"},
-    "switzerland": {capital:"Bern", population:"8.7 Million", language:"German, French, Italian", currency:"Swiss Franc (CHF)"},
-    "sweden": {capital:"Stockholm", population:"10 Million", language:"Swedish", currency:"Swedish Krona (SEK)"},
-    "norway": {capital:"Oslo", population:"5.4 Million", language:"Norwegian", currency:"Norwegian Krone (NOK)"},
-    "finland": {capital:"Helsinki", population:"5.5 Million", language:"Finnish, Swedish", currency:"Euro (EUR)"},
-    "denmark": {capital:"Copenhagen", population:"5.8 Million", language:"Danish", currency:"Danish Krone (DKK)"},
-    "philippines": {capital:"Manila", population:"113 Million", language:"Filipino, English", currency:"Philippine Peso (PHP)"},
-    "singapore": {capital:"Singapore", population:"5.7 Million", language:"English, Malay, Mandarin, Tamil", currency:"Singapore Dollar (SGD)"},
-    "malaysia": {capital:"Kuala Lumpur", population:"33 Million", language:"Malay", currency:"Malaysian Ringgit (MYR)"}
+    "india": {capital:"New Delhi", population:"1.4 Billion", language:"Hindi, English", currency:"INR"},
+    "usa": {capital:"Washington, D.C.", population:"331 Million", language:"English", currency:"USD"},
+    "canada": {capital:"Ottawa", population:"38 Million", language:"English, French", currency:"CAD"},
+    "japan": {capital:"Tokyo", population:"125 Million", language:"Japanese", currency:"JPY"},
+    "germany": {capital:"Berlin", population:"83 Million", language:"German", currency:"EUR"},
 };
 
-// Show country info
 function showCountryInfo(name) {
     const data = countries[name.toLowerCase()];
     if (data) {
@@ -92,7 +80,35 @@ function showCountryInfo(name) {
     }
 }
 
-// Speech recognition setup
+// ================= Definitions =================
+const definitions = {
+    "ai": "Artificial Intelligence is a branch of computer science that enables machines to perform tasks that normally require human intelligence, like learning, reasoning, problem-solving, and decision-making.",
+    "html": "HTML stands for HyperText Markup Language. It is used to create the structure of web pages and web applications.",
+    "css": "CSS stands for Cascading Style Sheets. It is used to style and design web pages, including layouts, colors, and fonts.",
+    "javascript": "JavaScript is a programming language used to make web pages interactive, including animations, form validation, and dynamic content.",
+    "python": "Python is a high-level programming language used for web development, data analysis, artificial intelligence, and scientific computing.",
+    "java": "Java is a versatile, object-oriented programming language used for building platform-independent applications, mobile apps, and enterprise software.",
+    "react": "React is a JavaScript library used for building user interfaces, especially single-page web applications with dynamic components.",
+    "nodejs": "Node.js is a runtime environment that allows JavaScript to be run on the server-side to build scalable network applications.",
+    "database": "A database is an organized collection of data that can be easily accessed, managed, and updated. Examples include MySQL, MongoDB, and PostgreSQL.",
+    "api": "An API, or Application Programming Interface, is a set of rules that allows different software applications to communicate and exchange data."
+};
+
+function getDefinition(term) {
+    term = term.toLowerCase().trim();
+    return definitions[term] || null;
+}
+
+// ================= Indian States & Cities =================
+const indiaCities = {
+    "andhra pradesh": ["amaravati", "visakhapatnam", "guntur", "tirupati", "vijayawada", "nellore", "kurnool", "anantapur", "kadapa"],
+    "telangana": ["hyderabad", "warangal", "nizamabad", "karimnagar", "khammam", "mahbubnagar"],
+    "maharashtra": ["mumbai", "pune", "nagpur", "nashik", "aurangabad", "solapur", "thane", "kolhapur", "amravati"],
+    "delhi": ["new delhi", "delhi"],
+    // ... Add more states and cities as needed
+};
+
+// ================= Speech Recognition =================
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -106,18 +122,31 @@ recognition.onresult = (event) => {
 
 // ================= Command Handling =================
 function takeCommand(message) {
-    message = message.toLowerCase();
+    message = message.toLowerCase().trim();
 
     // Greetings
     if (message.includes("hello") || message.includes("hey")) {
-        speak("Hello Sir, how may I help you?");
+        speak("Hello! How may I help you?");
+    }
+
+    // Definitions
+    else if (message.startsWith("what is") || message.startsWith("define")) {
+        let term = message.replace("what is","").replace("define","").trim();
+        const def = getDefinition(term);
+        if(def) {
+            speak(def);
+            content.textContent = def;
+        } else {
+            speak("Sorry, I don't have a definition for " + term);
+            content.textContent = "No definition found for " + term;
+        }
     }
 
     // AI Mode
     else if (message.includes("ai mode") || message.includes("jarvis mode") || message.includes("change to ai")) {
         triggerEffects(() => {
             speak("Switching to Jarvis AI Mode...");
-            window.location.href = "ai-mode.html"; 
+            window.location.href = "ai-mode.html";
         });
     }
 
@@ -131,7 +160,7 @@ function takeCommand(message) {
         const date = new Date().toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric", year:"numeric"});
         speak("Today's date is " + date);
         content.textContent = "Today's date is " + date;
-    }
+    } 
     else if (message.includes("time")) {
         const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         speak("The current time is " + time);
@@ -139,8 +168,8 @@ function takeCommand(message) {
     }
 
     // Calculator
-    else if (message.includes("calculate") || message.includes("what is") || message.includes("solve")) {
-        let expr = message.replace("calculate","").replace("what is","").replace("solve","").trim();
+    else if (message.includes("calculate") || message.includes("solve")) {
+        let expr = message.replace("calculate","").replace("solve","").trim();
         calculate(expr);
     }
 
@@ -149,6 +178,28 @@ function takeCommand(message) {
         let countryName = message.replace("country","").replace("show","").replace("tell me about","").trim();
         if (countryName) showCountryInfo(countryName);
         else speak("Please say the country name.");
+    }
+
+    // Weather (Indian cities)
+    else if (message.includes("weather in")) {
+        let city = message.replace("weather in","").trim().toLowerCase();
+        let found = false;
+
+        for (let state in indiaCities) {
+            if (indiaCities[state].some(c => c.toLowerCase() === city)) {
+                found = true;
+                break;
+            }
+        }
+
+        if(found) {
+            // Capitalize each word for API + add country code
+            let cityForAPI = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            getWeather(`${cityForAPI},IN`);
+        } else {
+            speak("I couldn't find that city in India. Please try another city.");
+            content.textContent = "City not found in India";
+        }
     }
 
     // Default → Google search
