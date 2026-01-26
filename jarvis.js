@@ -5,532 +5,167 @@ const countryContainer = document.getElementById("countryContainer");
 
 // ================= Speech synthesis =================
 function speak(text) {
-    const text_speak = new SpeechSynthesisUtterance(text);
-
-    text_speak.rate = 1;
-    text_speak.volume = 1;
-    text_speak.pitch = 1;
-
-    window.speechSynthesis.speak(text_speak);
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.rate = 1;
+    speech.pitch = 1;
+    speech.volume = 1;
+    window.speechSynthesis.speak(speech);
 }
+
+// ================= Greeting =================
 function wishMe() {
-    var day = new Date();
-    var hour = day.getHours();
-
-<<<<<<< HEAD
-// ================= Helper functions =================
-function triggerEffects(callback) {
-    setTimeout(callback, 500);
+    const hour = new Date().getHours();
+    if (hour < 12) speak("Good Morning Boss");
+    else if (hour < 17) speak("Good Afternoon Boss");
+    else speak("Good Evening Boss");
 }
 
+// ================= Helpers =================
 function speakAndThenNavigate(msg, url) {
     speak(msg);
-    setTimeout(() => window.open(url, "_blank"), 1500);
+    setTimeout(() => window.open(url, "_blank"), 1200);
 }
 
 function calculate(expr) {
     try {
-        let result = eval(expr);
+        const result = eval(expr);
         speak(`The answer is ${result}`);
         content.textContent = `Result: ${result}`;
-    } catch (error) {
-        speak("Sorry, I couldn't calculate that.");
+    } catch {
+        speak("Invalid calculation");
     }
 }
 
-// ================= Weather API =================
+// ================= Weather =================
 async function getWeather(city) {
-    const apiKey = "YOUR_API_KEY"; // <-- Replace with your OpenWeatherMap API key
+    const apiKey = "YOUR_API_KEY";
     try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},IN&appid=${apiKey}&units=metric`);
-        const data = await response.json();
+        const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city},IN&appid=${apiKey}&units=metric`
+        );
+        const data = await res.json();
 
         if (data.cod === 200) {
-            const msg = `Weather in ${city}: ${data.weather[0].description}, Temp: ${data.main.temp}°C`;
+            const msg = `Weather in ${city}: ${data.weather[0].description}, ${data.main.temp}°C`;
             speak(msg);
             content.textContent = msg;
         } else {
-            speak("Sorry, I couldn't find that city.");
-            content.textContent = "City not found";
+            speak("City not found");
         }
-    } catch (error) {
-        speak("There was an error fetching the weather.");
-        content.textContent = "Weather API error";
+    } catch {
+        speak("Weather error");
     }
 }
 
 // ================= Country Info =================
 const countries = {
-    "india": {capital:"New Delhi", population:"1.4 Billion", language:"Hindi, English", currency:"INR"},
-    "usa": {capital:"Washington, D.C.", population:"331 Million", language:"English", currency:"USD"},
-    "canada": {capital:"Ottawa", population:"38 Million", language:"English, French", currency:"CAD"},
-    "japan": {capital:"Tokyo", population:"125 Million", language:"Japanese", currency:"JPY"},
-    "germany": {capital:"Berlin", population:"83 Million", language:"German", currency:"EUR"},
+    india: { capital: "New Delhi", population: "1.4 Billion", language: "Hindi, English", currency: "INR" },
+    usa: { capital: "Washington DC", population: "331 Million", language: "English", currency: "USD" },
+    japan: { capital: "Tokyo", population: "125 Million", language: "Japanese", currency: "JPY" }
 };
 
 function showCountryInfo(name) {
     const data = countries[name.toLowerCase()];
-    if (data) {
-        countrySection.style.display = "block";
-        countryContainer.innerHTML = `
-            <div class="country-card">
-                <h3>${name.toUpperCase()}</h3>
-                <p><b>Capital:</b> ${data.capital}</p>
-                <p><b>Population:</b> ${data.population}</p>
-                <p><b>Language:</b> ${data.language}</p>
-                <p><b>Currency:</b> ${data.currency}</p>
-            </div>`;
-        speak(`Here is some information about ${name}`);
-=======
-    if (hour >= 0 && hour < 12) {
-        speak("Good Morning Boss...");
-    } else if (hour >= 12 && hour < 17) {
-        speak("Good Afternoon Master...");
->>>>>>> 9bda70ba55f1f075c7a9b5ee55e977e3e89dbdf8
-    } else {
-        speak("Sorry, I don't have data for that country yet.");
-    }
+    if (!data) return speak("No data for that country");
+
+    countrySection.style.display = "block";
+    countryContainer.innerHTML = `
+        <div class="country-card">
+            <h3>${name.toUpperCase()}</h3>
+            <p><b>Capital:</b> ${data.capital}</p>
+            <p><b>Population:</b> ${data.population}</p>
+            <p><b>Language:</b> ${data.language}</p>
+            <p><b>Currency:</b> ${data.currency}</p>
+        </div>`;
+    speak(`Information about ${name}`);
 }
 
 // ================= Definitions =================
 const definitions = {
-    "ai": "Artificial Intelligence is a branch of computer science that enables machines to perform tasks that normally require human intelligence, like learning, reasoning, problem-solving, and decision-making.",
-    "html": "HTML stands for HyperText Markup Language. It is used to create the structure of web pages and web applications.",
-    "css": "CSS stands for Cascading Style Sheets. It is used to style and design web pages, including layouts, colors, and fonts.",
-    "javascript": "JavaScript is a programming language used to make web pages interactive, including animations, form validation, and dynamic content.",
-    "python": "Python is a high-level programming language used for web development, data analysis, artificial intelligence, and scientific computing.",
-    "java": "Java is a versatile, object-oriented programming language used for building platform-independent applications, mobile apps, and enterprise software.",
-    "react": "React is a JavaScript library used for building user interfaces, especially single-page web applications with dynamic components.",
-    "nodejs": "Node.js is a runtime environment that allows JavaScript to be run on the server-side to build scalable network applications.",
-    "database": "A database is an organized collection of data that can be easily accessed, managed, and updated. Examples include MySQL, MongoDB, and PostgreSQL.",
-    "api": "An API, or Application Programming Interface, is a set of rules that allows different software applications to communicate and exchange data."
+    ai: "Artificial Intelligence enables machines to think and learn.",
+    html: "HTML creates the structure of web pages.",
+    css: "CSS styles web pages.",
+    javascript: "JavaScript makes websites interactive."
 };
 
 function getDefinition(term) {
-    term = term.toLowerCase().trim();
     return definitions[term] || null;
 }
 
-// ================= Indian States & Cities =================
-const indiaCities = {
-    "andhra pradesh": ["amaravati", "visakhapatnam", "guntur", "tirupati", "vijayawada", "nellore", "kurnool", "anantapur", "kadapa"],
-    "telangana": ["hyderabad", "warangal", "nizamabad", "karimnagar", "khammam", "mahbubnagar"],
-    "maharashtra": ["mumbai", "pune", "nagpur", "nashik", "aurangabad", "solapur", "thane", "kolhapur", "amravati"],
-    "delhi": ["new delhi", "delhi"],
-    // ... Add more states and cities as needed
-};
-
 // ================= Speech Recognition =================
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
 btn.addEventListener("click", () => recognition.start());
 
-recognition.onresult = (event) => {
-    const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
+recognition.onresult = (e) => {
+    const transcript = e.results[e.resultIndex][0].transcript.toLowerCase();
     content.textContent = transcript;
     takeCommand(transcript);
 };
 
-// ================= Command Handling =================
+// ================= Command Handler =================
 function takeCommand(message) {
-<<<<<<< HEAD
-    message = message.toLowerCase().trim();
 
-    // Greetings
     if (message.includes("hello") || message.includes("hey")) {
-        speak("Hello! How may I help you?");
+        speak("Hello, how can I help?");
     }
 
-    // Definitions
-    else if (message.startsWith("what is") || message.startsWith("define")) {
-        let term = message.replace("what is","").replace("define","").trim();
+    else if (message.startsWith("what is")) {
+        const term = message.replace("what is", "").trim();
         const def = getDefinition(term);
-        if(def) {
-            speak(def);
-            content.textContent = def;
-        } else {
-            speak("Sorry, I don't have a definition for " + term);
-            content.textContent = "No definition found for " + term;
-        }
+        def ? speak(def) : speak("No definition found");
     }
 
-    // AI Mode
-    else if (message.includes("ai mode") || message.includes("jarvis mode") || message.includes("change to ai")) {
-        triggerEffects(() => {
-            speak("Switching to Jarvis AI Mode...");
-            window.location.href = "ai-mode.html";
-        });
-    }
+    else if (message.includes("open google"))
+        speakAndThenNavigate("Opening Google", "https://www.google.com");
 
-    // Open websites
-    else if (message.includes("open google")) speakAndThenNavigate("Opening Google...", "https://www.google.com");
-    else if (message.includes("open youtube")) speakAndThenNavigate("Opening YouTube...", "https://www.youtube.com");
-    else if (message.includes("open facebook")) speakAndThenNavigate("Opening Facebook...", "https://www.facebook.com");
+    else if (message.includes("open youtube"))
+        speakAndThenNavigate("Opening YouTube", "https://www.youtube.com");
 
-    // Date & Time
-    else if (message.includes("date")) {
-        const date = new Date().toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric", year:"numeric"});
-        speak("Today's date is " + date);
-        content.textContent = "Today's date is " + date;
-    } 
+    else if (message.includes("open facebook"))
+        speakAndThenNavigate("Opening Facebook", "https://www.facebook.com");
+
     else if (message.includes("time")) {
-        const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        speak("The current time is " + time);
-        content.textContent = "Time: " + time;
+        const time = new Date().toLocaleTimeString();
+        speak("Current time is " + time);
+        content.textContent = time;
     }
 
-    // Calculator
-    else if (message.includes("calculate") || message.includes("solve")) {
-        let expr = message.replace("calculate","").replace("solve","").trim();
-        calculate(expr);
+    else if (message.includes("date")) {
+        const date = new Date().toDateString();
+        speak("Today's date is " + date);
+        content.textContent = date;
     }
 
-    // Country info
-    else if (message.includes("country") || message.includes("show") || message.includes("tell me about")) {
-        let countryName = message.replace("country","").replace("show","").replace("tell me about","").trim();
-        if (countryName) showCountryInfo(countryName);
-        else speak("Please say the country name.");
+    else if (message.includes("calculate")) {
+        calculate(message.replace("calculate", "").trim());
     }
 
-    // Weather (Indian cities)
     else if (message.includes("weather in")) {
-        let city = message.replace("weather in","").trim().toLowerCase();
-        let found = false;
-
-        for (let state in indiaCities) {
-            if (indiaCities[state].some(c => c.toLowerCase() === city)) {
-                found = true;
-                break;
-            }
-        }
-
-        if(found) {
-            // Capitalize each word for API + add country code
-            let cityForAPI = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-            getWeather(`${cityForAPI},IN`);
-        } else {
-            speak("I couldn't find that city in India. Please try another city.");
-            content.textContent = "City not found in India";
-        }
+        getWeather(message.replace("weather in", "").trim());
     }
 
-    // Default → Google search
-    else {
-        window.open(`https://www.google.com/search?q=${message.replace(/ /g,"+")}`, "_blank");
-        speak("I found some information for " + message + " on Google");
-        content.textContent = "Searching Google for " + message;
-=======
-    if (message.includes('hey') || message.includes('hello')) {
-        speak("Hello Sir, How May I Help You?");
-    } else if (message.includes("open google")) {
-        window.open("https://www.bing.com/search?pglt=297&q=google&cvid=9075900a09d148fe9f91608832c90cfd&gs_lcrp=EgRlZGdlKgYIABBFGDkyBggAEEUYOTIGCAEQRRg8MgYIAhBFGDwyBggDEEUYQTIGCAQQRRhBMgYIBRBFGDwyBggGEEUYPDIGCAcQRRhBMgYICBBFGDzSAQgzMzQ5ajBqMagCALACAA&FORM=ANNTA1&PC=HCTS", "_blank");
-        window.open("https://www.google.com", "_blank");
-        speak("Opening Google...");
-        window.location.href = "https://www.google.com";  // navigates immediately in the same tab google
-    } 
-    else if (message.includes("open whatsapp")) {
-        window.open("https://wa.me/", "_blank");
-        speak("Opening Whatsapp...");
-        window.location.href = "https://wa.me/1234567890";  // navigates immediately in the same tab whatsapp
+    else if (message.includes("country")) {
+        showCountryInfo(message.replace("country", "").trim());
     }
-  
 
-    else if (message.includes("open youtube")) {
-        window.open("https://www.youtube.com/", "_blank");
-        speak("Opening Youtube...");
-        window.location.href = "https://www.youtube.com";  // navigates immediately in the same tab youtube
-    } else if (message.includes("open facebook")) {
-        window.open("https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2F", "_blank");
-        speak("Opening Facebook...");
-        window.location.href = "https://www.facebook.com";  // navigates immediately in the same tab facebook
-    } 
-else if (message.includes("open calculator")) {
-    speak("Opening calculator");
-    window.open("https://www.desmos.com/scientific", "_blank");
-    window.location.href = "https://www.desmos.com/scientific";  // navigates immediately in the same tab calculator
-}
     else if (message.includes("joke")) {
         const jokes = [
-            "Why do programmers prefer dark mode? Because light attracts bugs!",
-    "I told my computer I needed a break, and now it won't stop sending me Kit Kat ads.",
-    "Why do Java developers wear glasses? Because they don't C sharp.",
-    "Why did the programmer quit his job? Because he didn't get arrays.",
-    "Why don’t skeletons fight each other? They don’t have the guts.",
-    "Why can’t you hear a pterodactyl go to the bathroom? Because the P is silent.",
-    "What do you call cheese that isn't yours? Nacho cheese!",
-    "Why was the math book sad? It had too many problems.",
-    "I used to play piano by ear, but now I use my hands.",
-    "Parallel lines have so much in common… it’s a shame they’ll never meet.",
-    "Why did the scarecrow win an award? Because he was outstanding in his field!",
-    "I asked my dog what's two minus two. He said nothing.",
-    "I would tell you a construction joke, but I’m still working on it.",
-    "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
-    "What do you call fake spaghetti? An impasta!",
-    "What did the zero say to the eight? Nice belt!",
-    "Why can't your nose be 12 inches long? Because then it would be a foot!",
-    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
-    "I’m reading a book about anti-gravity. It’s impossible to put down!",
-    "I told my computer I needed a break, now it won’t stop recommending beaches.",
-    "Why don’t oysters share their pearls? Because they’re shellfish.",
-    "What happens to a frog's car when it breaks down? It gets toad away.",
-    "Want to hear a joke about paper? Never mind, it’s tearable.",
-    "Why did the bicycle fall over? Because it was two-tired.",
-    "Why do programmers hate nature? It has too many bugs"
-    
+            "Why do programmers hate nature? Too many bugs.",
+            "Why did Java break up with Python? Too many exceptions."
         ];
-        const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
+        const joke = jokes[Math.floor(Math.random() * jokes.length)];
+        speak(joke);
+        content.textContent = joke;
     }
 
-else if (message.includes("jokes for students")) {
-        const jokesforstudents = [
-            "Why was the math book sad? Because it had too many problems.",
-    "Why did the student eat his homework? Because the teacher told him it was a piece of cake!",
-    "Why don’t scientists trust atoms? Because they make up everything!",
-    "Why did the music teacher go to jail? Because she got caught with too many notes.",
-    "What did the zero say to the eight? Nice belt!",
-    "Why was the computer cold? Because it left its Windows open!",
-    "Why do we never tell secrets on a farm? Because the potatoes have eyes and the corn has ears!",
-    "Why did the student bring a ladder to school? Because she wanted to go to high school.",
-    "How do you make seven an even number? Remove the ‘s’!",
-    "Why can't you do your math homework in the jungle? Because if you add 4+4, you get ate!",
-    "Why did the teacher wear sunglasses to class? Because her students were so bright!",
-    "Why did the pencil get an award? Because it had a point.",
-    "Why did the biology teacher break up with the physics teacher? There was no chemistry.",
-    "Teacher: 'Why are you late?' Student: 'Class started before I got here!'",
-    "Why don’t we write with broken pencils? Because it’s pointless."
-        ];
-        const randomJoke = jokesforstudents[Math.floor(Math.random() * jokesforstudents.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
-    }
-
-
-else if (message.includes("open instagram")) {
-        window.open("https://www.instagram.com/", "_blank");
-        speak("Opening Instagram...");
-        window.location.href = "https://www.instagram.com/";  // navigates immediately in the same tab instagram
-    } 
-  else if (message.includes('what is') || message.includes('who is') || message.includes('what are')) {
-        window.open(`https://www.google.com/search?q=${message.replace(/ /g, "+")}`,"_blank");
-        const finalText = "This is what I found on the internet regarding " + message;
-        speak(finalText);
-    }
-  else if (message.includes("battery")) {
-    if ("getBattery" in navigator) {
-        navigator.getBattery().then(function(battery) {
-            const level = Math.round(battery.level * 100);
-            const chargingStatus = battery.charging ? "Yes, it is charging." : "No, it is not charging.";
-
-            // First message: battery percentage
-            speak(`Your battery is at ${level} percent.`);
-            content.textContent = `Your battery is at ${level} percent.`;
-
-            // Delay the second message slightly so they don't overlap
-            setTimeout(() => {
-                speak(`Is it charging? ${chargingStatus}`);
-                content.textContent += `\nIs it charging? ${chargingStatus}`;
-            }, 2500); // 2.5 second delay
-        });
-    } else {
-        const unsupported = "Sorry, your device does not support checking battery status.";
-        speak(unsupported);
-        content.textContent = unsupported;
->>>>>>> 9bda70ba55f1f075c7a9b5ee55e977e3e89dbdf8
+    else {
+        window.open(
+            `https://www.google.com/search?q=${message.replace(/ /g, "+")}`,
+            "_blank"
+        );
+        speak("Here is what I found on Google");
     }
 }
- 
-
-    else if (message.includes("open wikipedia")) {
-        window.open("https://www.wikipedia.org/", "_blank");
-        speak("Opening wikipedia...");
-        window.location.href = "https://www.wikipedia.org/";  // navigates immediately in the same tab wikipedia
-    } 
-     else if (message.includes("play music")) {
-        window.open("https://music.youtube.com", "_blank");
-        speak("Opening YouTube Music for you...");
-        window.location.href = "https://music.youtube.com";  // navigates immediately in the same tab music
-    } 
-      else if (message.includes('date')) {
-        const date = new Date().toLocaleString(undefined, { month: "short", day: "numeric" });
-        const finalText = "Today's date is " + date;
-        speak(finalText);
-    }  else {
-        window.open(`https://www.google.com/search?q=${message.replace(/ /g, "+")}`, "_blank");
-        const finalText = "I found some information for " + message + " on Google";
-        speak(finalText);
-    }
-}
-function takeCommand(message) {
-    if (message.includes("open google")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Google...");
-        utterance.onend = () => {
-            window.location.href = "https://www.google.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    } 
-    else if (message.includes("open facebook")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Facebook...");
-        utterance.onend = () => {
-            window.location.href = "https://www.facebook.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-    else if (message.includes("ai mode")) {
-    speak("Opening AI Mode...");
-    content.textContent = "Opening AI Mode...";
-    window.open("ai-mode.html", "_blank");
-}
-
-
-
-        else if (message.includes("open whatsapp")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Whatsapp...");
-        utterance.onend = () => {
-            window.location.href = "https://wa.me/1234567890";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-       else if (message.includes("open youtube")) {
-        const utterance = new SpeechSynthesisUtterance("Opening YouTube...");
-        utterance.onend = () => {
-            window.location.href = "https://www.youtube.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-   else if (message.includes("time")) {
-        const time = new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        const finalText = "The current time is " + time;
-        speak(finalText);                // Say it
-        content.textContent = finalText; // Show it
-    }
-    else if (message.includes("open instagram")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Instagram...");
-        utterance.onend = () => {
-            window.location.href = "https://www.instagram.com/";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-      else if (message.includes("open wikipedia")) {
-        const utterance = new SpeechSynthesisUtterance("Opening wikipedia...");
-        utterance.onend = () => {
-            window.location.href = "https://www.wikipedia.org/";
-        };
-        window.speechSynthesis.speak(utterance);
-    }
-      else if (message.includes("joke")) {
-        const jokes = [
-           "Why do programmers prefer dark mode? Because light attracts bugs!",
-    "I told my computer I needed a break, and now it won't stop sending me Kit Kat ads.",
-    "Why do Java developers wear glasses? Because they don't C sharp.",
-    "Why did the programmer quit his job? Because he didn't get arrays.",
-    "Why don’t skeletons fight each other? They don’t have the guts.",
-    "Why can’t you hear a pterodactyl go to the bathroom? Because the P is silent.",
-    "What do you call cheese that isn't yours? Nacho cheese!",
-    "Why was the math book sad? It had too many problems.",
-    "I used to play piano by ear, but now I use my hands.",
-    "Parallel lines have so much in common… it’s a shame they’ll never meet.",
-    "Why did the scarecrow win an award? Because he was outstanding in his field!",
-    "I asked my dog what's two minus two. He said nothing.",
-    "I would tell you a construction joke, but I’m still working on it.",
-    "Did you hear about the restaurant on the moon? Great food, no atmosphere.",
-    "What do you call fake spaghetti? An impasta!",
-    "What did the zero say to the eight? Nice belt!",
-    "Why can't your nose be 12 inches long? Because then it would be a foot!",
-    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
-    "I’m reading a book about anti-gravity. It’s impossible to put down!",
-    "I told my computer I needed a break, now it won’t stop recommending beaches.",
-    "Why don’t oysters share their pearls? Because they’re shellfish.",
-    "What happens to a frog's car when it breaks down? It gets toad away.",
-    "Want to hear a joke about paper? Never mind, it’s tearable.",
-    "Why did the bicycle fall over? Because it was two-tired.",
-    "Why do programmers hate nature? It has too many bugs"
-        ];
-        const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
-    }
- else if (message.includes("jokes for students")) {
-        const jokesforstudents = [
-            "Why was the math book sad? Because it had too many problems.",
-    "Why did the student eat his homework? Because the teacher told him it was a piece of cake!",
-    "Why don’t scientists trust atoms? Because they make up everything!",
-    "Why did the music teacher go to jail? Because she got caught with too many notes.",
-    "What did the zero say to the eight? Nice belt!",
-    "Why was the computer cold? Because it left its Windows open!",
-    "Why do we never tell secrets on a farm? Because the potatoes have eyes and the corn has ears!",
-    "Why did the student bring a ladder to school? Because she wanted to go to high school.",
-    "How do you make seven an even number? Remove the ‘s’!",
-    "Why can't you do your math homework in the jungle? Because if you add 4+4, you get ate!",
-    "Why did the teacher wear sunglasses to class? Because her students were so bright!",
-    "Why did the pencil get an award? Because it had a point.",
-    "Why did the biology teacher break up with the physics teacher? There was no chemistry.",
-    "Teacher: 'Why are you late?' Student: 'Class started before I got here!'",
-    "Why don’t we write with broken pencils? Because it’s pointless."
-        ];
-        const randomJoke = jokesforstudents[Math.floor(Math.random() * jokesforstudents.length)];
-        speak(randomJoke);
-        content.textContent = randomJoke;
-    }
-
-    else if (message.includes("open calculator")) {
-        const utterance = new SpeechSynthesisUtterance("Opening Calculator...");
-        utterance.onend = () => {
-            window.location.href = "https://www.desmos.com/scientific";
-        };
-        window.speechSynthesis.speak(utterance);
-    }  
-    else if (message.includes("battery")) {
-    if ("getBattery" in navigator) {
-        navigator.getBattery().then(function(battery) {
-            const level = Math.round(battery.level * 100);
-            const chargingStatus = battery.charging ? "Yes, it is charging." : "No, it is not charging.";
-
-            // First message: battery percentage
-            speak(`Your battery is at ${level} percent.`);
-            content.textContent = `Your battery is at ${level} percent.`;
-
-            // Delay the second message slightly so they don't overlap
-            setTimeout(() => {
-                speak(`Is it charging? ${chargingStatus}`);
-                content.textContent += `\nIs it charging? ${chargingStatus}`;
-            }, 2500); // 2.5 second delay
-        });
-    } else {
-        const unsupported = "Sorry, your device does not support checking battery status.";
-        speak(unsupported);
-        content.textContent = unsupported;
-    }
-}
-    
-
-
-
-    else if (message.includes("play music")) {
-        const utterance = new SpeechSynthesisUtterance("Opening YouTube Music for you...");
-        utterance.onend = () => {
-            window.location.href = "https://music.youtube.com";
-        };
-        window.speechSynthesis.speak(utterance);
-    }  
-   else if (message.includes("date")) {
-    const date = new Date().toLocaleDateString(undefined, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-    });
-
-    const finalText = "Today's date is " + date;
-    speak(finalText);                // Speak the date
-    content.textContent = finalText; // Show it on the screen
-}
-
-}
-
