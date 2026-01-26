@@ -115,4 +115,4 @@ Jarvis is a **voice-controlled AI assistant** that can **chat, execute tasks, op
 **M.L. Tejaswi**  
 
 *All rights reserved.*
->>>>>>> b25bc67eb4cc25bb9f89bcbaa6e1ecabb8e964af
+>>>>>>>
